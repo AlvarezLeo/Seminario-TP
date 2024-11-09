@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: com.mysql.cj.jdbc.Driver
+Class-Path: com.mysql.cj.jdbc.Driver
+

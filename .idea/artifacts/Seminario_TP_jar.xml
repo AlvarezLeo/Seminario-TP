@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Seminario TP:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Seminario_TP_jar</output-path>
+    <root id="archive" name="Seminario TP.jar">
+      <element id="module-output" name="Seminario TP" />
+    </root>
+  </artifact>
+</component>

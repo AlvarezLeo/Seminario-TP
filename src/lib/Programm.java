@@ -2,43 +2,66 @@ package lib;
 
 import clases.*;
 
+import java.sql.*;
 import java.util.Scanner;
+import lib.Programm;
+import lib.Connect;
 
 public class Programm {
-    public void executeBlock() {
+    private Statement statement = null;
+    private PreparedStatement preparedStatement = null;
+    private ResultSet resultSet = null;
+    public void executeBlock() throws ClassNotFoundException, SQLException {
         int option;
+        String url = "jdbc:mysql://localhost:3306";
+        String username = "root";
+        String password = "Leoa33879671";
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection connection = DriverManager.getConnection(url, username, password);
         Menu menu = new Menu();
         option = menu.createMenu();
-        if(option < 1 || option > 9) {
+        if(option < 1 || option > 14) {
             throw (new IllegalArgumentException("Invalid option"));
         }
-        while (option < 10) {
+        while (option < 14) {
             switch (option) {
                 case 1:
-                    nuevaCancha();
+                    nuevaCancha(connection);
                     break;
                 case 2:
-                    mostrarCanchas();
+                    borrarCancha(connection);
                     break;
                 case 3:
-                    nuevoTurno();
+                    mostrarCanchas(connection);
                     break;
                 case 4:
-                    mostrarTurnos();
+                    nuevoTurno(connection);
                     break;
                 case 5:
-                    nuevoJugador();
+                    borrarTurno(connection);
                     break;
                 case 6:
-                    mostrarJugadores();
+                    mostrarTurnos(connection);
                     break;
                 case 7:
-                    nuevoTorneo();
+                    nuevoJugador(connection);
                     break;
                 case 8:
-                    mostrarTorneos();
+                    borrarJugador(connection);
                     break;
                 case 9:
+                    mostrarJugadores(connection);
+                    break;
+                case 10:
+                    nuevoTorneo(connection);
+                    break;
+                case 11:
+                    borrarTorneo(connection);
+                    break;
+                case 12:
+                    mostrarTorneos(connection);
+                    break;
+                case 13:
                     System.exit(0);
                 default:
                     break;
@@ -50,12 +73,15 @@ public class Programm {
         }
     }
 
-    public void nuevaCancha() {
+    public void nuevaCancha(Connection conn) throws SQLException {
         System.out.println("Nueva Cancha");
+        //PreparedStatement preparedStatement = null;
+        //Statement statement = null;
         int canchaId;
         String tipoCancha;
         String nombreCancha;
         String techadaInd;
+        int updRows;
         Scanner input = new Scanner(System.in);
         System.out.println("Ingrese Numero de Cancha:");
         canchaId = input.nextInt();
@@ -66,32 +92,67 @@ public class Programm {
         nombreCancha = input.nextLine();
         System.out.println("Ingrese el indicador de Techada:");
         techadaInd = input.nextLine();
+        preparedStatement = conn.prepareStatement("UPDATE seminarioS21.Canchas SET tipoCancha = ? " +
+                ",nombreCancha = ? " +
+                ",techadaInd = ? " +
+                "WHERE " +
+                "canchaId = ?");
+        preparedStatement.setString(1, tipoCancha);
+        preparedStatement.setString(2, nombreCancha);
+        preparedStatement.setString(3, techadaInd);
+        preparedStatement.setInt(4, canchaId);
+        updRows = preparedStatement.executeUpdate();
+        if(updRows == 0) {
+            preparedStatement = conn.prepareStatement("insert into seminarioS21.Canchas VALUES (?,?,?,?)");
+            preparedStatement.setInt(1, canchaId);
+            preparedStatement.setString(2, tipoCancha);
+            preparedStatement.setString(3, nombreCancha);
+            preparedStatement.setString(4, techadaInd);
+            preparedStatement.executeUpdate();
+        }
         Cancha newCancha = new Cancha(canchaId, tipoCancha, nombreCancha, techadaInd);
         GlobalVars.arrayCanchas[GlobalVars.cantCanchas] = newCancha;;
         GlobalVars.cantCanchas++;
     }
 
-    public void mostrarCanchas() {
+    public void borrarCancha(Connection conn) throws SQLException {
+        System.out.println("Nueva Cancha");
+        //PreparedStatement preparedStatement = null;
+        //Statement statement = null;
+        int canchaId;
+        //int updRows;
+        Scanner input = new Scanner(System.in);
+        System.out.println("Ingrese Numero de Cancha:");
+        canchaId = input.nextInt();
+        input.nextLine();
+        preparedStatement = conn.prepareStatement("DELETE FROM  seminarioS21.Canchas WHERE canchaId = ?");
+        preparedStatement.setInt(1, canchaId);
+        preparedStatement.executeUpdate();
+    }
+
+    public void mostrarCanchas(Connection conn) throws SQLException {
+        statement = conn.createStatement();
+        resultSet = statement.executeQuery("select * from seminarioS21.Canchas");
         System.out.println("Canchas:");
         System.out.println("Num|Tipo|Nombre|Techada");
         System.out.println("-----------------------");
-        for (int i = 0; i < GlobalVars.cantCanchas; i++) {
-            System.out.println(GlobalVars.arrayCanchas[i].getCanchaId()
-                    + "|" +  GlobalVars.arrayCanchas[i].getTipoCancha()
-                    + "|" + GlobalVars.arrayCanchas[i].getNombreCancha()
-                    + "|" + GlobalVars.arrayCanchas[i].getTechadaInd()
-            );
+        while(resultSet.next()) {
+            System.out.println(resultSet.getInt("CanchaId")
+                    + "|" +  resultSet.getString("TipoCancha")
+                    + "|" + resultSet.getString("NombreCancha")
+                    + "|" + resultSet.getString("TechadaInd"));
         }
         System.out.println("-----------------------");
     }
 
-    public void nuevoTurno() {
+    public void nuevoTurno(Connection conn) throws SQLException {
         System.out.println("Nuevo Turno");
         String fecha;
         String hora;
         int canchaId;
         String nombre;
         String apellido;
+        int updRows;
         Scanner input = new Scanner(System.in);
         System.out.println("Ingrese Fecha");
         fecha = input.nextLine();
@@ -104,28 +165,76 @@ public class Programm {
         nombre = input.nextLine();
         System.out.println("Ingrese Apellido del Cliente");
         apellido = input.nextLine();
+        preparedStatement = conn.prepareStatement("UPDATE SeminarioS21.Turnos SET cnahcaId = ?, " +
+                "nombre = ?," +
+                "apellido = ? " +
+                "WHERE " +
+                "fecha = ? " +
+                "AND hora = ? ");
+        preparedStatement.setInt(1,canchaId);
+        preparedStatement.setString(2,nombre);
+        preparedStatement.setString(3,apellido);
+        preparedStatement.setString(4,fecha);
+        preparedStatement.setString(5,hora);
+        updRows =  preparedStatement.executeUpdate();
+
+        if(updRows == 0) {
+            preparedStatement = conn.prepareStatement("INSERT INTO SeminarioS21.Turnos VALUES (?,?,?,?,?)");
+            preparedStatement.setString(1, fecha);
+            preparedStatement.setString(2, hora);
+            preparedStatement.setInt(3, canchaId);
+            preparedStatement.setString(4, nombre);
+            preparedStatement.setString(5, apellido);
+            preparedStatement.executeUpdate();
+        }
         Turno newTurno = new Turno(fecha, hora, canchaId, nombre, apellido);
         GlobalVars.arrayTurnos[GlobalVars.cantTurnos] = newTurno;
         GlobalVars.cantTurnos++;
     }
 
-    public void mostrarTurnos() {
+    public void borrarTurno(Connection conn) throws SQLException {
+        System.out.println("Borrar Turno");
+        //PreparedStatement preparedStatement = null;
+        //Statement statement = null;
+        String fecha;
+        String hora;
+        //int updRows;
+        Scanner input = new Scanner(System.in);
+        System.out.println("Ingrese Fecha");
+        fecha = input.nextLine();
+        System.out.println("Ingrese Hora");
+        hora = input.nextLine();
+        preparedStatement = conn.prepareStatement("DELETE FROM  seminarioS21.Turnos WHERE fecha = ? AND hora = ?");
+        preparedStatement.setString(1, fecha);
+        preparedStatement.setString(2, hora);
+        preparedStatement.executeUpdate();
+    }
+
+    public void mostrarTurnos(Connection conn) throws SQLException {
         System.out.println("Turnos:");
         System.out.println("Fecha|Hora|Cancha|Nombre|Apellido");
         System.out.println("---------------------------------");
-        for (int i = 0; i < GlobalVars.cantTurnos; i++) {
-            System.out.println(GlobalVars.arrayTurnos[i].getFecha()
-                    + "|" + GlobalVars.arrayTurnos[i].getHora()
-                    + "|" + GlobalVars.arrayTurnos[i].getCanchaId()
-                    + "|" + GlobalVars.arrayTurnos[i].getNombre()
-                    + " " + GlobalVars.arrayTurnos[i].getApellido()
-            );
+        statement = conn.createStatement();
+        resultSet = statement.executeQuery("select \n" +
+                "\tcast(fecha as char(10)) as fecha,\n" +
+                "    cast(hora as char(10)) as hora,\n" +
+                "    canchaId,\n" +
+                "    nombre,\n" +
+                "    apellido\n" +
+                "from seminarioS21.Turnos;");
+        while(resultSet.next()) {
+            System.out.println(resultSet.getString("fecha")
+                    + "|" +  resultSet.getString("hora")
+                    + "|" + resultSet.getString("canchaId")
+                    + "|" + resultSet.getString("nombre")
+                    + "|" + resultSet.getString("apellido"));
         }
         System.out.println("---------------------------------");
     }
 
-    public void nuevoJugador() {
+    public void nuevoJugador(Connection conn) throws SQLException {
         System.out.println("Nuevo Jugador");
+        int updRows;
         int documentoId;
         String nombre;
         String apellido;
@@ -140,27 +249,64 @@ public class Programm {
         apellido = input.nextLine();
         System.out.println("Ingrese Categoria:");
         categoriaId = input.nextInt();
+        preparedStatement = conn.prepareStatement("UPDATE SeminarioS21.Jugadores SET " +
+                "nombre = ? " +
+                ",apellido = ? " +
+                ",categoriaId = ? " +
+                "WHERE " +
+                "documentoId = ?");
+
+        preparedStatement.setString(1,nombre);
+        preparedStatement.setString(2,apellido);
+        preparedStatement.setInt(3,categoriaId);
+        preparedStatement.setInt(4,documentoId);
+        updRows = preparedStatement.executeUpdate();
+
+        if(updRows == 0) {
+            preparedStatement = conn.prepareStatement("INSERT INTO SeminarioS21.Jugadores VALUES (?,?,?,?)");
+            preparedStatement.setInt(1, documentoId);
+            preparedStatement.setString(2, nombre);
+            preparedStatement.setString(3, apellido);
+            preparedStatement.setInt(4, categoriaId);
+            preparedStatement.executeUpdate();
+        }
         Jugador newJugador = new Jugador(documentoId, nombre, apellido, categoriaId);
         GlobalVars.arrayJugadores[GlobalVars.cantJugadores] = newJugador;;
         GlobalVars.cantJugadores++;
     }
 
-    public void mostrarJugadores() {
+    public void borrarJugador(Connection conn) throws SQLException {
+        System.out.println("Borrar Jugador");
+        //PreparedStatement preparedStatement = null;
+        //Statement statement = null;
+        int documentoId;
+        //int updRows;
+        Scanner input = new Scanner(System.in);
+        System.out.println("Ingrese Documento:");
+        documentoId = input.nextInt();
+        preparedStatement = conn.prepareStatement("DELETE FROM  seminarioS21.Jugadores WHERE documentoId = ?");
+        preparedStatement.setInt(1, documentoId);
+        preparedStatement.executeUpdate();
+    }
+
+    public void mostrarJugadores(Connection conn) throws SQLException {
         System.out.println("Jugadores:");
         System.out.println("Documento|Nombre|Apellido|Categoria");
         System.out.println("-----------------------------------");
-        for (int i = 0; i < GlobalVars.cantJugadores; i++) {
-            System.out.println(GlobalVars.arrayJugadores[i].getDocumentoId()
-                    + "|" + GlobalVars.arrayJugadores[i].getNombre()
-                    + "|" + GlobalVars.arrayJugadores[i].getApellido()
-                    + "|" + GlobalVars.arrayJugadores[i].getCategoriaId()
-            );
+        statement = conn.createStatement();
+        resultSet = statement.executeQuery("select * from SeminarioS21.Jugadores");
+        while(resultSet.next()) {
+            System.out.println(resultSet.getInt("documentoId")
+                    + "|" +  resultSet.getString("nombre")
+                    + "|" + resultSet.getString("apellido")
+                    + "|" + resultSet.getInt("categoriaId"));
         }
         System.out.println("-----------------------------------");
     }
 
-    public void nuevoTorneo(){
+    public void nuevoTorneo(Connection conn) throws SQLException {
         System.out.println("Nuevo Torneo");
+        int updRows;
         int torneoId;
         String fecha;
         int categoriaId;
@@ -172,20 +318,53 @@ public class Programm {
         fecha = input.nextLine();
         System.out.println("Ingrese Categoria:");
         categoriaId = input.nextInt();
+        preparedStatement = conn.prepareStatement("UPDATE SeminarioS21.Torneos SET " +
+                "fecha = ? " +
+                ",categoriaId = ? " +
+                "WHERE " +
+                "torneoId = ?");
+
+        preparedStatement.setString(1,fecha);
+        preparedStatement.setInt(2,categoriaId);
+        preparedStatement.setInt(3,torneoId);
+        updRows = preparedStatement.executeUpdate();
+
+        if(updRows == 0) {
+            preparedStatement = conn.prepareStatement("INSERT INTO SeminarioS21.Torneos VALUES (?,?,?)");
+            preparedStatement.setInt(1, torneoId);
+            preparedStatement.setString(2, fecha);
+            preparedStatement.setInt(3, categoriaId);
+            preparedStatement.executeUpdate();
+        }
         Torneo newTorneo = new Torneo(torneoId, fecha, categoriaId);
         GlobalVars.arrayTorneos[GlobalVars.cantTorneos] = newTorneo;;
         GlobalVars.cantTorneos++;
     }
 
-    public void mostrarTorneos() {
+    public void borrarTorneo(Connection conn) throws SQLException {
+        System.out.println("Borrar Torneo");
+        //PreparedStatement preparedStatement = null;
+        //Statement statement = null;
+        int torneoId;
+        //int updRows;
+        Scanner input = new Scanner(System.in);
+        System.out.println("Ingrese Numero de Torneo:");
+        torneoId = input.nextInt();
+        preparedStatement = conn.prepareStatement("DELETE FROM  seminarioS21.Torneos WHERE torneoId = ?");
+        preparedStatement.setInt(1, torneoId);
+        preparedStatement.executeUpdate();
+    }
+
+    public void mostrarTorneos(Connection conn) throws SQLException {
         System.out.println("Torneos:");
         System.out.println("Torneo|Fecha|Categoria");
         System.out.println("----------------------");
-        for (int i = 0; i < GlobalVars.cantTorneos; i++) {
-            System.out.println(GlobalVars.arrayTorneos[i].getFecha()
-                    + "|" + GlobalVars.arrayTorneos[i].getFecha()
-                    + "|" + GlobalVars.arrayTorneos[i].getCategoriaId()
-            );
+        statement = conn.createStatement();
+        resultSet = statement.executeQuery("select * from SeminarioS21.Torneos");
+        while(resultSet.next()) {
+            System.out.println(resultSet.getInt("torneoId")
+                    + "|" +  resultSet.getString("fecha")
+                    + "|" + resultSet.getString("categoriaId"));
         }
         System.out.println("-----------------------------------");
     }

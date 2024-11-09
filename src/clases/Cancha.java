@@ -1,6 +1,9 @@
 package clases;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Scanner;
+import java.sql.PreparedStatement;
 
 public class Cancha {
     private int canchaId;
@@ -47,9 +50,10 @@ public class Cancha {
         this.techadaInd = techadaInd;
     }
 
-    public void nuevaCancha() {
+    public void nuevaCancha(Connection conn) throws SQLException {
         System.out.println("Nueva Cancha");
         int canchaId;
+        PreparedStatement preparedStatement = null;
         String tipoCancha;
         String nombreCancha;
         String techadaInd;
@@ -63,6 +67,11 @@ public class Cancha {
         nombreCancha = input.nextLine();
         System.out.println("Ingrese el indicador de Techada:");
         techadaInd = input.nextLine();
+        preparedStatement = conn.prepareStatement("insert into seminarioS21.Canchas VALUES (?,?,?,?)");
+        preparedStatement.setInt(1, canchaId);
+        preparedStatement.setString(2, tipoCancha);
+        preparedStatement.setString(3, nombreCancha);
+        preparedStatement.setString(4, techadaInd);
         Cancha newCancha = new Cancha(canchaId, tipoCancha, nombreCancha, techadaInd);
         GlobalVars.arrayCanchas[GlobalVars.cantCanchas] = newCancha;;
         GlobalVars.cantCanchas++;
