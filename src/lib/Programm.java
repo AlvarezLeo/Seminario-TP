@@ -13,11 +13,13 @@ public class Programm {
     private ResultSet resultSet = null;
     public void executeBlock() throws ClassNotFoundException, SQLException {
         int option;
+        System.out.println("Conectando a la base de datos...");
         String url = "jdbc:mysql://localhost:3306";
         String username = "root";
         String password = "Leoa33879671";
         Class.forName("com.mysql.cj.jdbc.Driver");
         Connection connection = DriverManager.getConnection(url, username, password);
+        System.out.println("Conexion realizada con exito.");
         Menu menu = new Menu();
         option = menu.createMenu();
         if(option < 1 || option > 14) {
@@ -67,7 +69,7 @@ public class Programm {
                     break;
             }
             option = menu.createMenu();
-            if(option < 1 || option > 9) {
+            if(option < 1 || option > 14) {
                 throw (new IllegalArgumentException("Invalid option"));
             }
         }
@@ -109,10 +111,15 @@ public class Programm {
             preparedStatement.setString(3, nombreCancha);
             preparedStatement.setString(4, techadaInd);
             preparedStatement.executeUpdate();
+            System.out.println("Registro insertado con exito.");
         }
-        Cancha newCancha = new Cancha(canchaId, tipoCancha, nombreCancha, techadaInd);
-        GlobalVars.arrayCanchas[GlobalVars.cantCanchas] = newCancha;;
-        GlobalVars.cantCanchas++;
+        else {
+            System.out.println("Registro actualizado con exito.");
+        }
+
+        //Cancha newCancha = new Cancha(canchaId, tipoCancha, nombreCancha, techadaInd);
+        //GlobalVars.arrayCanchas[GlobalVars.cantCanchas] = newCancha;;
+        //GlobalVars.cantCanchas++;
     }
 
     public void borrarCancha(Connection conn) throws SQLException {
@@ -128,11 +135,12 @@ public class Programm {
         preparedStatement = conn.prepareStatement("DELETE FROM  seminarioS21.Canchas WHERE canchaId = ?");
         preparedStatement.setInt(1, canchaId);
         preparedStatement.executeUpdate();
+        System.out.println("Registro borrado con exito.");
     }
 
     public void mostrarCanchas(Connection conn) throws SQLException {
         statement = conn.createStatement();
-        resultSet = statement.executeQuery("select * from seminarioS21.Canchas");
+        resultSet = statement.executeQuery("select * from seminarioS21.Canchas order by canchaId");
         System.out.println("Canchas:");
         System.out.println("Num|Tipo|Nombre|Techada");
         System.out.println("-----------------------");
@@ -165,7 +173,7 @@ public class Programm {
         nombre = input.nextLine();
         System.out.println("Ingrese Apellido del Cliente");
         apellido = input.nextLine();
-        preparedStatement = conn.prepareStatement("UPDATE SeminarioS21.Turnos SET cnahcaId = ?, " +
+        preparedStatement = conn.prepareStatement("UPDATE SeminarioS21.Turnos SET canchaId = ?, " +
                 "nombre = ?," +
                 "apellido = ? " +
                 "WHERE " +
@@ -186,10 +194,14 @@ public class Programm {
             preparedStatement.setString(4, nombre);
             preparedStatement.setString(5, apellido);
             preparedStatement.executeUpdate();
+            System.out.println("Registro insertado con exito.");
         }
-        Turno newTurno = new Turno(fecha, hora, canchaId, nombre, apellido);
-        GlobalVars.arrayTurnos[GlobalVars.cantTurnos] = newTurno;
-        GlobalVars.cantTurnos++;
+        else {
+            System.out.println("Registro actualizado con exito.");
+        }
+        //Turno newTurno = new Turno(fecha, hora, canchaId, nombre, apellido);
+        //GlobalVars.arrayTurnos[GlobalVars.cantTurnos] = newTurno;
+        //GlobalVars.cantTurnos++;
     }
 
     public void borrarTurno(Connection conn) throws SQLException {
@@ -208,6 +220,7 @@ public class Programm {
         preparedStatement.setString(1, fecha);
         preparedStatement.setString(2, hora);
         preparedStatement.executeUpdate();
+        System.out.println("Registro borrado con exito.");
     }
 
     public void mostrarTurnos(Connection conn) throws SQLException {
@@ -221,7 +234,8 @@ public class Programm {
                 "    canchaId,\n" +
                 "    nombre,\n" +
                 "    apellido\n" +
-                "from seminarioS21.Turnos;");
+                "from seminarioS21.Turnos " +
+                "order by fecha, hora;");
         while(resultSet.next()) {
             System.out.println(resultSet.getString("fecha")
                     + "|" +  resultSet.getString("hora")
@@ -269,10 +283,14 @@ public class Programm {
             preparedStatement.setString(3, apellido);
             preparedStatement.setInt(4, categoriaId);
             preparedStatement.executeUpdate();
+            System.out.println("Registro insertado con exito.");
         }
-        Jugador newJugador = new Jugador(documentoId, nombre, apellido, categoriaId);
-        GlobalVars.arrayJugadores[GlobalVars.cantJugadores] = newJugador;;
-        GlobalVars.cantJugadores++;
+        else {
+            System.out.println("Registro actualizado con exito.");
+        }
+        //Jugador newJugador = new Jugador(documentoId, nombre, apellido, categoriaId);
+        //GlobalVars.arrayJugadores[GlobalVars.cantJugadores] = newJugador;;
+        //GlobalVars.cantJugadores++;
     }
 
     public void borrarJugador(Connection conn) throws SQLException {
@@ -287,6 +305,7 @@ public class Programm {
         preparedStatement = conn.prepareStatement("DELETE FROM  seminarioS21.Jugadores WHERE documentoId = ?");
         preparedStatement.setInt(1, documentoId);
         preparedStatement.executeUpdate();
+        System.out.println("Registro borrado con exito.");
     }
 
     public void mostrarJugadores(Connection conn) throws SQLException {
@@ -335,10 +354,14 @@ public class Programm {
             preparedStatement.setString(2, fecha);
             preparedStatement.setInt(3, categoriaId);
             preparedStatement.executeUpdate();
+            System.out.println("Registro insertado con exito.");
         }
-        Torneo newTorneo = new Torneo(torneoId, fecha, categoriaId);
-        GlobalVars.arrayTorneos[GlobalVars.cantTorneos] = newTorneo;;
-        GlobalVars.cantTorneos++;
+        else {
+            System.out.println("Registro actualizado con exito.");
+        }
+        //Torneo newTorneo = new Torneo(torneoId, fecha, categoriaId);
+        //GlobalVars.arrayTorneos[GlobalVars.cantTorneos] = newTorneo;;
+        //GlobalVars.cantTorneos++;
     }
 
     public void borrarTorneo(Connection conn) throws SQLException {
@@ -353,6 +376,7 @@ public class Programm {
         preparedStatement = conn.prepareStatement("DELETE FROM  seminarioS21.Torneos WHERE torneoId = ?");
         preparedStatement.setInt(1, torneoId);
         preparedStatement.executeUpdate();
+        System.out.println("Registro borrado con exito.");
     }
 
     public void mostrarTorneos(Connection conn) throws SQLException {
@@ -360,7 +384,7 @@ public class Programm {
         System.out.println("Torneo|Fecha|Categoria");
         System.out.println("----------------------");
         statement = conn.createStatement();
-        resultSet = statement.executeQuery("select * from SeminarioS21.Torneos");
+        resultSet = statement.executeQuery("select * from SeminarioS21.Torneos order by fecha;");
         while(resultSet.next()) {
             System.out.println(resultSet.getInt("torneoId")
                     + "|" +  resultSet.getString("fecha")
