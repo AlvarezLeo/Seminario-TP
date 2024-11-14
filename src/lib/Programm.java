@@ -4,8 +4,6 @@ import clases.*;
 
 import java.sql.*;
 import java.util.Scanner;
-import lib.Programm;
-import lib.Connect;
 
 public class Programm {
     private Statement statement = null;
