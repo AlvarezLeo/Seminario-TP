@@ -1,9 +1,7 @@
 package clases;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Scanner;
-import java.sql.PreparedStatement;
 
 public class Cancha {
     private int canchaId;
@@ -16,6 +14,14 @@ public class Cancha {
         this.tipoCancha = tipoCancha;
         this.nombreCancha = nombreCancha;
         this.techadaInd = techadaInd;
+    }
+
+    public Cancha (int canchaId) {
+        this.canchaId = canchaId;
+    }
+
+    public Cancha(){
+
     }
 
     public int getCanchaId() {
@@ -50,43 +56,53 @@ public class Cancha {
         this.techadaInd = techadaInd;
     }
 
-    public void nuevaCancha(Connection conn) throws SQLException {
-        System.out.println("Nueva Cancha");
-        int canchaId;
+    public void insertCancha(Connection conn) throws SQLException {
         PreparedStatement preparedStatement = null;
-        String tipoCancha;
-        String nombreCancha;
-        String techadaInd;
-        Scanner input = new Scanner(System.in);
-        System.out.println("Ingrese Numero de Cancha:");
-        canchaId = input.nextInt();
-        input.nextLine();
-        System.out.println("Ingrese Tipo de Cancha:");
-        tipoCancha = input.nextLine();
-        System.out.println("Ingrese el Nombre de la Cancha:");
-        nombreCancha = input.nextLine();
-        System.out.println("Ingrese el indicador de Techada:");
-        techadaInd = input.nextLine();
-        preparedStatement = conn.prepareStatement("insert into seminarioS21.Canchas VALUES (?,?,?,?)");
-        preparedStatement.setInt(1, canchaId);
-        preparedStatement.setString(2, tipoCancha);
-        preparedStatement.setString(3, nombreCancha);
-        preparedStatement.setString(4, techadaInd);
-        Cancha newCancha = new Cancha(canchaId, tipoCancha, nombreCancha, techadaInd);
-        GlobalVars.arrayCanchas[GlobalVars.cantCanchas] = newCancha;;
-        GlobalVars.cantCanchas++;
+        int updRows;
+        preparedStatement = conn.prepareStatement("UPDATE seminarioS21.Canchas SET tipoCancha = ? " +
+                ",nombreCancha = ? " +
+                ",techadaInd = ? " +
+                "WHERE " +
+                "canchaId = ?");
+        preparedStatement.setString(1, this.tipoCancha);
+        preparedStatement.setString(2, this.nombreCancha);
+        preparedStatement.setString(3, this.techadaInd);
+        preparedStatement.setInt(4, this.canchaId);
+        updRows = preparedStatement.executeUpdate();
+        if(updRows == 0) {
+            preparedStatement = conn.prepareStatement("insert into seminarioS21.Canchas VALUES (?,?,?,?)");
+            preparedStatement.setInt(1, this.canchaId);
+            preparedStatement.setString(2, this.tipoCancha);
+            preparedStatement.setString(3, this.nombreCancha);
+            preparedStatement.setString(4, this.techadaInd);
+            preparedStatement.executeUpdate();
+            System.out.println("Registro insertado con exito.");
+        }
+        else {
+            System.out.println("Registro actualizado con exito.");
+        }
     }
 
-    public void mostrarCanchas() {
+    public void borrarCancha(Connection conn) throws SQLException {
+        PreparedStatement preparedStatement = null;
+        preparedStatement = conn.prepareStatement("DELETE FROM  seminarioS21.Canchas WHERE canchaId = ?");
+        preparedStatement.setInt(1, this.canchaId);
+        preparedStatement.executeUpdate();
+        System.out.println("Registro borrado con exito.");
+    }
+
+    public void mostrarCanchas(Connection conn) throws SQLException {
+        ResultSet resultSet = null;
+        Statement statement = conn.createStatement();
+        resultSet = statement.executeQuery("select * from seminarioS21.Canchas order by canchaId");
         System.out.println("Canchas:");
         System.out.println("Num|Tipo|Nombre|Techada");
         System.out.println("-----------------------");
-        for (int i = 0; i < GlobalVars.cantCanchas; i++) {
-            System.out.println(GlobalVars.arrayCanchas[i].getCanchaId()
-                    + "|" +  GlobalVars.arrayCanchas[i].getTipoCancha()
-                    + "|" + GlobalVars.arrayCanchas[i].getNombreCancha()
-                    + "|" + GlobalVars.arrayCanchas[i].getTechadaInd()
-            );
+        while(resultSet.next()) {
+            System.out.println(resultSet.getInt("CanchaId")
+                    + "|" +  resultSet.getString("TipoCancha")
+                    + "|" + resultSet.getString("NombreCancha")
+                    + "|" + resultSet.getString("TechadaInd"));
         }
         System.out.println("-----------------------");
     }

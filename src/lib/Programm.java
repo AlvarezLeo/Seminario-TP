@@ -94,30 +94,8 @@ public class Programm {
         nombreCancha = input.nextLine();
         System.out.println("Ingrese el indicador de Techada:");
         techadaInd = input.nextLine();
-        preparedStatement = conn.prepareStatement("UPDATE seminarioS21.Canchas SET tipoCancha = ? " +
-                ",nombreCancha = ? " +
-                ",techadaInd = ? " +
-                "WHERE " +
-                "canchaId = ?");
-        preparedStatement.setString(1, tipoCancha);
-        preparedStatement.setString(2, nombreCancha);
-        preparedStatement.setString(3, techadaInd);
-        preparedStatement.setInt(4, canchaId);
-        updRows = preparedStatement.executeUpdate();
-        if(updRows == 0) {
-            preparedStatement = conn.prepareStatement("insert into seminarioS21.Canchas VALUES (?,?,?,?)");
-            preparedStatement.setInt(1, canchaId);
-            preparedStatement.setString(2, tipoCancha);
-            preparedStatement.setString(3, nombreCancha);
-            preparedStatement.setString(4, techadaInd);
-            preparedStatement.executeUpdate();
-            System.out.println("Registro insertado con exito.");
-        }
-        else {
-            System.out.println("Registro actualizado con exito.");
-        }
-
-        //Cancha newCancha = new Cancha(canchaId, tipoCancha, nombreCancha, techadaInd);
+        Cancha newCancha = new Cancha(canchaId, tipoCancha, nombreCancha, techadaInd);
+        newCancha.insertCancha(conn);
         //GlobalVars.arrayCanchas[GlobalVars.cantCanchas] = newCancha;;
         //GlobalVars.cantCanchas++;
     }
@@ -132,25 +110,13 @@ public class Programm {
         System.out.println("Ingrese Numero de Cancha:");
         canchaId = input.nextInt();
         input.nextLine();
-        preparedStatement = conn.prepareStatement("DELETE FROM  seminarioS21.Canchas WHERE canchaId = ?");
-        preparedStatement.setInt(1, canchaId);
-        preparedStatement.executeUpdate();
-        System.out.println("Registro borrado con exito.");
+        Cancha newCancha = new Cancha(canchaId);
+        newCancha.borrarCancha(conn);
     }
 
     public void mostrarCanchas(Connection conn) throws SQLException {
-        statement = conn.createStatement();
-        resultSet = statement.executeQuery("select * from seminarioS21.Canchas order by canchaId");
-        System.out.println("Canchas:");
-        System.out.println("Num|Tipo|Nombre|Techada");
-        System.out.println("-----------------------");
-        while(resultSet.next()) {
-            System.out.println(resultSet.getInt("CanchaId")
-                    + "|" +  resultSet.getString("TipoCancha")
-                    + "|" + resultSet.getString("NombreCancha")
-                    + "|" + resultSet.getString("TechadaInd"));
-        }
-        System.out.println("-----------------------");
+        Cancha newCancha = new Cancha();
+        newCancha.mostrarCanchas(conn);
     }
 
     public void nuevoTurno(Connection conn) throws SQLException {
@@ -173,33 +139,8 @@ public class Programm {
         nombre = input.nextLine();
         System.out.println("Ingrese Apellido del Cliente");
         apellido = input.nextLine();
-        preparedStatement = conn.prepareStatement("UPDATE SeminarioS21.Turnos SET canchaId = ?, " +
-                "nombre = ?," +
-                "apellido = ? " +
-                "WHERE " +
-                "fecha = ? " +
-                "AND hora = ? ");
-        preparedStatement.setInt(1,canchaId);
-        preparedStatement.setString(2,nombre);
-        preparedStatement.setString(3,apellido);
-        preparedStatement.setString(4,fecha);
-        preparedStatement.setString(5,hora);
-        updRows =  preparedStatement.executeUpdate();
-
-        if(updRows == 0) {
-            preparedStatement = conn.prepareStatement("INSERT INTO SeminarioS21.Turnos VALUES (?,?,?,?,?)");
-            preparedStatement.setString(1, fecha);
-            preparedStatement.setString(2, hora);
-            preparedStatement.setInt(3, canchaId);
-            preparedStatement.setString(4, nombre);
-            preparedStatement.setString(5, apellido);
-            preparedStatement.executeUpdate();
-            System.out.println("Registro insertado con exito.");
-        }
-        else {
-            System.out.println("Registro actualizado con exito.");
-        }
-        //Turno newTurno = new Turno(fecha, hora, canchaId, nombre, apellido);
+        Turno newTurno = new Turno(fecha, hora, canchaId, nombre, apellido);
+        newTurno.insertTurno(conn);
         //GlobalVars.arrayTurnos[GlobalVars.cantTurnos] = newTurno;
         //GlobalVars.cantTurnos++;
     }
@@ -216,34 +157,13 @@ public class Programm {
         fecha = input.nextLine();
         System.out.println("Ingrese Hora");
         hora = input.nextLine();
-        preparedStatement = conn.prepareStatement("DELETE FROM  seminarioS21.Turnos WHERE fecha = ? AND hora = ?");
-        preparedStatement.setString(1, fecha);
-        preparedStatement.setString(2, hora);
-        preparedStatement.executeUpdate();
-        System.out.println("Registro borrado con exito.");
+        Turno newTurno = new Turno(fecha, hora);
+        newTurno.borrarTurno(conn);
     }
 
     public void mostrarTurnos(Connection conn) throws SQLException {
-        System.out.println("Turnos:");
-        System.out.println("Fecha|Hora|Cancha|Nombre|Apellido");
-        System.out.println("---------------------------------");
-        statement = conn.createStatement();
-        resultSet = statement.executeQuery("select \n" +
-                "\tcast(fecha as char(10)) as fecha,\n" +
-                "    cast(hora as char(10)) as hora,\n" +
-                "    canchaId,\n" +
-                "    nombre,\n" +
-                "    apellido\n" +
-                "from seminarioS21.Turnos " +
-                "order by fecha, hora;");
-        while(resultSet.next()) {
-            System.out.println(resultSet.getString("fecha")
-                    + "|" +  resultSet.getString("hora")
-                    + "|" + resultSet.getString("canchaId")
-                    + "|" + resultSet.getString("nombre")
-                    + "|" + resultSet.getString("apellido"));
-        }
-        System.out.println("---------------------------------");
+        Turno newTurno = new Turno();
+        newTurno.mostrarTurnos(conn);
     }
 
     public void nuevoJugador(Connection conn) throws SQLException {
@@ -263,32 +183,8 @@ public class Programm {
         apellido = input.nextLine();
         System.out.println("Ingrese Categoria:");
         categoriaId = input.nextInt();
-        preparedStatement = conn.prepareStatement("UPDATE SeminarioS21.Jugadores SET " +
-                "nombre = ? " +
-                ",apellido = ? " +
-                ",categoriaId = ? " +
-                "WHERE " +
-                "documentoId = ?");
-
-        preparedStatement.setString(1,nombre);
-        preparedStatement.setString(2,apellido);
-        preparedStatement.setInt(3,categoriaId);
-        preparedStatement.setInt(4,documentoId);
-        updRows = preparedStatement.executeUpdate();
-
-        if(updRows == 0) {
-            preparedStatement = conn.prepareStatement("INSERT INTO SeminarioS21.Jugadores VALUES (?,?,?,?)");
-            preparedStatement.setInt(1, documentoId);
-            preparedStatement.setString(2, nombre);
-            preparedStatement.setString(3, apellido);
-            preparedStatement.setInt(4, categoriaId);
-            preparedStatement.executeUpdate();
-            System.out.println("Registro insertado con exito.");
-        }
-        else {
-            System.out.println("Registro actualizado con exito.");
-        }
-        //Jugador newJugador = new Jugador(documentoId, nombre, apellido, categoriaId);
+        Jugador newJugador = new Jugador(documentoId, nombre, apellido, categoriaId);
+        newJugador.insertJugador(conn);
         //GlobalVars.arrayJugadores[GlobalVars.cantJugadores] = newJugador;;
         //GlobalVars.cantJugadores++;
     }
@@ -302,25 +198,13 @@ public class Programm {
         Scanner input = new Scanner(System.in);
         System.out.println("Ingrese Documento:");
         documentoId = input.nextInt();
-        preparedStatement = conn.prepareStatement("DELETE FROM  seminarioS21.Jugadores WHERE documentoId = ?");
-        preparedStatement.setInt(1, documentoId);
-        preparedStatement.executeUpdate();
-        System.out.println("Registro borrado con exito.");
+        Jugador newJugador = new Jugador(documentoId);
+        newJugador.borrarJugador(conn);
     }
 
     public void mostrarJugadores(Connection conn) throws SQLException {
-        System.out.println("Jugadores:");
-        System.out.println("Documento|Nombre|Apellido|Categoria");
-        System.out.println("-----------------------------------");
-        statement = conn.createStatement();
-        resultSet = statement.executeQuery("select * from SeminarioS21.Jugadores");
-        while(resultSet.next()) {
-            System.out.println(resultSet.getInt("documentoId")
-                    + "|" +  resultSet.getString("nombre")
-                    + "|" + resultSet.getString("apellido")
-                    + "|" + resultSet.getInt("categoriaId"));
-        }
-        System.out.println("-----------------------------------");
+        Jugador newJugador = new Jugador();
+        newJugador.mostrarJugadores(conn);
     }
 
     public void nuevoTorneo(Connection conn) throws SQLException {
@@ -337,29 +221,8 @@ public class Programm {
         fecha = input.nextLine();
         System.out.println("Ingrese Categoria:");
         categoriaId = input.nextInt();
-        preparedStatement = conn.prepareStatement("UPDATE SeminarioS21.Torneos SET " +
-                "fecha = ? " +
-                ",categoriaId = ? " +
-                "WHERE " +
-                "torneoId = ?");
-
-        preparedStatement.setString(1,fecha);
-        preparedStatement.setInt(2,categoriaId);
-        preparedStatement.setInt(3,torneoId);
-        updRows = preparedStatement.executeUpdate();
-
-        if(updRows == 0) {
-            preparedStatement = conn.prepareStatement("INSERT INTO SeminarioS21.Torneos VALUES (?,?,?)");
-            preparedStatement.setInt(1, torneoId);
-            preparedStatement.setString(2, fecha);
-            preparedStatement.setInt(3, categoriaId);
-            preparedStatement.executeUpdate();
-            System.out.println("Registro insertado con exito.");
-        }
-        else {
-            System.out.println("Registro actualizado con exito.");
-        }
-        //Torneo newTorneo = new Torneo(torneoId, fecha, categoriaId);
+        Torneo newTorneo = new Torneo(torneoId, fecha, categoriaId);
+        newTorneo.insertTorneo(conn);
         //GlobalVars.arrayTorneos[GlobalVars.cantTorneos] = newTorneo;;
         //GlobalVars.cantTorneos++;
     }
@@ -373,23 +236,12 @@ public class Programm {
         Scanner input = new Scanner(System.in);
         System.out.println("Ingrese Numero de Torneo:");
         torneoId = input.nextInt();
-        preparedStatement = conn.prepareStatement("DELETE FROM  seminarioS21.Torneos WHERE torneoId = ?");
-        preparedStatement.setInt(1, torneoId);
-        preparedStatement.executeUpdate();
-        System.out.println("Registro borrado con exito.");
+        Torneo newTorneo = new Torneo(torneoId);
+        newTorneo.borrarTorneo(conn);
     }
 
     public void mostrarTorneos(Connection conn) throws SQLException {
-        System.out.println("Torneos:");
-        System.out.println("Torneo|Fecha|Categoria");
-        System.out.println("----------------------");
-        statement = conn.createStatement();
-        resultSet = statement.executeQuery("select * from SeminarioS21.Torneos order by fecha;");
-        while(resultSet.next()) {
-            System.out.println(resultSet.getInt("torneoId")
-                    + "|" +  resultSet.getString("fecha")
-                    + "|" + resultSet.getString("categoriaId"));
-        }
-        System.out.println("-----------------------------------");
+        Torneo newTorneo = new Torneo();
+        newTorneo.mostrarTorneos(conn);
     }
 }
